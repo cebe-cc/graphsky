@@ -14,7 +14,7 @@ $conf['host_metric_group_depth'] = 2;
 $conf['cluster_hostname'] = "*";
 
 # Graphite settings
-$conf['graphite_url_base'] = "http://stats.cebe.cc";
+$conf['graphite_url_base'] = "http://graphite.status.cebe.cc";
 $conf['graphite_render_url'] = $conf['graphite_url_base'] . "/render";
 $conf['graphite_search_url'] = $conf['graphite_url_base'] . "/metrics/expand/?query=";
 # Don't forget the trailing . when specifying a prefix
