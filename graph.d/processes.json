@@ -1,0 +1,15 @@
+{
+    "report_name" : "processes",
+    "service_name" : "Processes",
+    "title" : "Process Report",
+    "vertical_label" : "number of processes",
+    "series" : [
+        { "metric": "processes.uninterruptible", "color": "orange", "label": "uninterruptible", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.runnable", "color": "green", "label": "runnable", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.sleeping", "color": "3333bb", "label": "sleeping", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.stopped", "color": "black", "label": "stopped", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.paging", "color": "white", "label": "paging", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.dead", "color": "gray", "label": "dead", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "processes.zombie", "color": "red", "label": "zombie", "type": "stack", "functions": ["averageSeries"] }
+    ]
+}

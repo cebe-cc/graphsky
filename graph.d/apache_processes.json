@@ -1,0 +1,11 @@
+{
+    "report_name" : "apache_processes",
+    "title" : "Apache processes",
+    "vertical_label" : "processes",
+    "series" : [
+        { "metric": "apache_processes.busy80", "color": "blue", "label": "busy", "type": "stack" },
+        { "metric": "apache_processes.idle80", "color": "green", "label": "idle", "type": "stack" }
+    ]
+    , "_comment" :         { "metric": "apache_processes.free80", "color": "grey", "label": "free", "type": "stack" }
+
+}

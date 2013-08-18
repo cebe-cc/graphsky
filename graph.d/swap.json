@@ -1,0 +1,10 @@
+{
+    "report_name" : "swap",
+    "service_name" : "Swap",
+    "title" : "Swap Report",
+    "vertical_label" : "bytes",
+    "units": "binary",
+    "series": [
+        { "metric": "memory.swap", "color": "red", "label": "Used", "type": "stack" }
+     ]
+}

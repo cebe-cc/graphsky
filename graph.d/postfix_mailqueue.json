@@ -1,0 +1,13 @@
+{
+    "report_name" : "postfix_mailqueue",
+    "title" : "postfix mailqueue",
+    "vertical_label" : "mails",
+    "series" : [
+        { "metric": "postfix_mailqueue.active", "color": "green", "label": "busy", "type": "stack" },
+        { "metric": "postfix_mailqueue.corrupt", "color": "red", "label": "idle", "type": "stack" },
+        { "metric": "postfix_mailqueue.deferred", "color": "yellow", "label": "idle", "type": "stack" },
+        { "metric": "postfix_mailqueue.hold", "color": "brown", "label": "idle", "type": "stack" },
+        { "metric": "postfix_mailqueue.incomming", "color": "blue", "label": "idle", "type": "stack" },
+        { "metric": "postfix_mailqueue.maildrop", "color": "organe", "label": "idle", "type": "stack" }
+    ]
+}

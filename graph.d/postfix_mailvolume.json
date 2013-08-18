@@ -1,0 +1,8 @@
+{
+    "report_name" : "postfix_mailvolume",
+    "title" : "Postfix volume",
+    "vertical_label" : "volume",
+    "series" : [
+        { "metric": "postfix_mailvolume.volume", "color": "5555cc", "label": "volume", "line_width": "2", "type": "line", "functions" : ["derivative"] }
+    ]
+}

@@ -1,0 +1,8 @@
+{
+    "report_name" : "apache_accesses",
+    "title" : "Apache accesses",
+    "vertical_label" : "hits",
+    "series" : [
+        { "metric": "apache_accesses.accesses80", "color": "5555cc", "label": "Hits", "line_width": "2", "type": "line", "functions" : ["derivative"] }
+    ]
+}
