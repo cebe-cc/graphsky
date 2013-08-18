@@ -1,3 +1,7 @@
+html {
+    height: 100%;
+}
+
 body {
     color: #000;
     margin: 0px;
@@ -17,9 +21,8 @@ div#container {
 }
 
 div#header {
-    vertical-align: middle;
     width: 100%;
-    height: 25px;
+    height: 26px;
     background-color: #323232;
     border-bottom: 4px solid #33B5E5;
 }
@@ -32,8 +35,44 @@ div.header_text a {
     text-decoration: none;
 }
 
+div#menu {
+    display: table;
+    background-color: #DDD;
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid #CCC;
+    box-shadow: 0px 1px 5px rgba(0,0,0,.1);
+}
+
+div.menu_row {
+    display: table-row;
+}
+
+div.menu_cell {
+    display: table-cell;
+    vertical-align: middle;
+    height: 32px;
+    padding-left: 2px;
+    color: #444;
+    text-decoration: none;
+}
+
+div.menu_cell a {
+    color: #33B5E5;
+}
+
+div.left {
+    float: left;
+}
+
+div.right {
+    float: right;
+}
+
+
 .small_menu_button {
-    padding-right: 10px;
+    padding-right: 30px;
+    background: url(img/small_menu_holo.png) no-repeat;
 }
 
 #small_menu {
@@ -56,7 +95,6 @@ div.small_menu_row {
 
 div.small_menu_cell {
     display: table-cell;
-    vertical-align: middle;
     height: 20px;
     font-size: 14px;
 }
@@ -69,7 +107,6 @@ div.small_menu_title {
 hr {
     color: #33B5E5;
     background-color: #33B5E5;
-    width: 90%;
     height: 1px;
     border: 0px;
 }
@@ -78,7 +115,7 @@ input#from_calendar,
 input#until_calendar {
     border: solid 1px #CCC;
     font-size: small;
-    height: 28px;
+    padding: 5px;
     width: 130px;
 }
 
@@ -96,9 +133,11 @@ button {
 }
 
 select {
-    padding-left: 0.5em;
+#    padding-left: 0.5em;
     width: 120px;
-    height: 28px;
+#    height: 32px;
+    font-size: small;
+    padding: 5px;
     border: solid 1px #CCC;
     color: black;
     overflow: hidden;
@@ -110,57 +149,23 @@ select {
 }
 
 .select:before {
-    border-right: 8px solid #7C7C7C;
+    border-right: 8px solid #888888;
     border-top: 8px solid transparent;
     content: "";
     position: absolute;
     left: 90%;
-    bottom: 12%;
+    bottom: 15%;
 }
 
 .select {
     display: inline-block;
     position: relative;
     width: 120px;
-    height: 28px;
-}
-
-div#menu {
-    display: table;
-    background-color: #DDD;
-    width: 100%;
     height: 32px;
-    padding-top: 2px;
-    border-bottom: 1px solid #CCC;
-    box-shadow: 0px 1px 5px rgba(0,0,0,.1);
-}
-
-div.menu_row {
-    display: table-row;
-    vertical-align: middle;
-}
-
-div.menu_cell,
-div.menu_cell a {
-    display: table-cell;
-    vertical-align: middle;
-    height: 30px;
-    padding-left: 5px;
-    color: #444;
-    text-decoration: none;
-}
-
-div.left {
-    float: left;
-}
-
-div.right {
-    float: right;
 }
 
 div#main {
-    padding: 10px;
-    padding-bottom: 50px;
+    padding: 0px 10px 20px 10px;
 }
 
 div.block_title,
@@ -189,7 +194,7 @@ div.graph_card {
     display: inline-block;
     border-radius: 2px;
     box-shadow: 0px 2px 4px rgba(0,0,0,.2);
-    margin: 10px 5px 0px 0px;
+    margin: 5px 5px 5px 0px;
     padding: 3px;
 }
 
@@ -203,19 +208,16 @@ div.graph_buttons {
 
 div#footer {
     width: 100%;
-    background-color: #323232;
-    border-top: 2px solid #33B5E5;
     bottom: 0;
     height: 20px;
+    position: absolute;
     text-align: center;
     font-size: 11px;
-    padding: 5px 0px 5px 0px;
-    color: #FFF;
-    position: absolute;
+    color: #888;
 }
 
 div#footer a{
-    color: #CCC;
+    color: #888;
     font-weight: bold;
 }
 
