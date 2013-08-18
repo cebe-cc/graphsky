@@ -5,10 +5,13 @@
     "vertical_label" : "percentage",
     "graph_max" : "100",
     "series" : [
-        { "metric": "cpu.*.cpu.user.value", "color": "3333bb", "label": "User", "type": "stack", "functions": ["averageSeries"] },
-        { "metric": "cpu.*.cpu.nice.value", "color": "ffea00", "label": "Nice", "type": "stack", "functions": ["averageSeries"] },
-        { "metric": "cpu.*.cpu.system.value", "color": "dd0000", "label": "System", "type": "stack", "functions": ["averageSeries"] },
-        { "metric": "cpu.*.cpu.wait.value", "color": "ff8a60", "label": "Wait", "type": "stack", "functions": ["averageSeries"] },
-        { "metric": "cpu.*.cpu.idle.value", "color": "e2e2f2AA", "label": "Idle", "type": "stack", "functions": ["averageSeries"] }
-    ]
+        { "metric": "cpu.user", "color": "3333bb", "label": "User", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.nice", "color": "ffea00", "label": "Nice", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.system", "color": "dd0000", "label": "System", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.iowait", "color": "ff8a60", "label": "IO Wait", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.steal", "color": "darkgrey", "label": "steal", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.irq", "color": "orange", "label": "irq", "type": "stack", "functions": ["averageSeries"] },
+        { "metric": "cpu.softirq", "color": "purple", "label": "softirq", "type": "stack", "functions": ["averageSeries"] }
+    ],
+    "_commented" : { "metric": "cpu.idle", "color": "e2e2f2AA", "label": "Idle", "type": "stack", "functions": ["averageSeries"] }
 }

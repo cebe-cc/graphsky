@@ -2,25 +2,37 @@
     {
         "name": "default",
         "included_reports": [
-            "load",
+            "processes",
             "cpu",
-            "mem",
             "network",
-            "packets",
-            "disk_ops",
-            "disk",
-            "ntpd"
+            "virt_network",
+            "mem",
+            "swap",
+            "load"
         ],
         "environments": "/.*/",
         "clusters": "/.*/"
     },
     {
-        "name": "mysql",
+        "name": "apache",
         "included_reports": [
-            "mysql"
+            "apache_accesses",
+            "apache_processes",
+            "apache_volume"
         ],
         "environments": "/.*/",
-        "clusters": "/^(dbslaves|dbmasters)$/"
+        "clusters": "/.*/",
+        "hosts": "/tador/"
+    },
+    {
+        "name": "postfix",
+        "included_reports": [
+            "postfix_mailqueue",
+            "postfix_mailstats",
+            "postfix_mailvolume"
+        ],
+        "environments": "/.*/",
+        "clusters": "/.*/"
     },
     {
         "name": "virtual",

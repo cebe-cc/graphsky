@@ -5,9 +5,9 @@
     "vertical_label" : "bytes",
     "units": "binary",
     "series": [
-        { "metric": "memory.memory.used.value", "color": "5555cc", "label": "Used", "type": "stack" },
-        { "metric": "memory.memory.cached.value", "color": "33cc33", "label": "Cached", "type": "stack" },
-        { "metric": "memory.memory.buffered.value", "color": "99ff33", "label": "Buffered", "type": "stack" },
-        { "metric": "memory.memory.free.value", "color": "e2e2f2AA", "label": "Free", "type": "stack" }
+        { "metric": "memory.apps", "color": "5555cc", "label": "Used", "type": "stack" },
+        { "metric": "memory.cached", "color": "33cc33", "label": "Cached", "type": "stack" },
+        { "metric": "memory.buffers", "color": "99ff33", "label": "Buffered", "type": "stack" },
+        { "metric": "memory.free", "color": "e2e2f2AA", "label": "Free", "type": "stack" }
      ]
 }
