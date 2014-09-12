@@ -1,7 +1,6 @@
-<a name="overview"></a>
-<a href="#overview">
-    <div class="block_title">Overview</div>
-</a>
+<a class="anchor" id="overview">&nbsp;</a>
+<div class="block_title"><a href="#overview">Cluster overview</a></div>
+
 <div class="graph_block">
 <?php
 $graph_args = "env=$env&c=$c&l=$l";
@@ -20,16 +19,14 @@ elseif (isset($graph_reports)) {
 }
 ?>
 </div>
-<a name="hosts"></a>
-<a href="#hosts">
-    <div class="block_title">Hosts</div>
-</a>
+<a class="anchor" id="hosts">&nbsp;</a>
+<div class="block_title"><a href="#hosts">Hosts</a></div>
 
 <?php
 $host_search = json_decode(file_get_contents($conf['graphite_search_url'] . $conf['graphite_prefix'] . "$env.$c.*"), TRUE);
 $hosts = $host_search['results'];
 natsort($hosts);
-if (isset($g)) { print "<div class=\"graph_block\">"; }
+if (isset($g) or isset($m)) { print "<div class=\"graph_block\">"; }
 foreach ($hosts as $host) {
     $host_name = str_replace($conf['graphite_prefix'] . "$env.$c.", "", $host);
     if ($host_name == $conf['cluster_hostname']) { continue; }
@@ -39,7 +36,7 @@ foreach ($hosts as $host) {
             $current_graph_args = $graph_args . "&h=$host_name";
             print print_graph($current_graph_args, "g=$graph_report", $z, $from, $until);
         }
-        if (!isset($g)) { print "<br /><br /></div>"; }
+        if (!isset($g)) { print "</div>"; }
     }
     elseif (isset($m)) {
         $depth = $conf['host_metric_group_depth'] + 1;

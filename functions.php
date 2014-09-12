@@ -23,6 +23,9 @@ function print_dropdown_menus($options, $choice, $default) {
     if ( $default != "" ) {
         $option_values = "                <option value=\"\">$default</option>\n";
     }
+    else {
+        $option_values = "";
+    }
     foreach ($options as $option) {
         if ($option == $choice) {
             $selected = "selected=\"selected\"";
@@ -44,7 +47,7 @@ function get_graph_domainname() {
     if ($conf['use_random_graph_domainname'])
         return str_replace("//", "//img" . rand(10,80) . ".", $conf['graph_domainname']);
 
-    return $conf['graph_domainname'];
+    return ""; #$conf['graph_domainname'];
 }
 
 #------------------------------------------------------------------------------
@@ -52,12 +55,16 @@ function get_graph_domainname() {
 function build_graphite_series( $config, $host_cluster = "" ) {
     $targets = array();
     $colors = array();
-    $function = array();
     // Keep track of stacked items
     $stacked = 0;
     $pie = 0;
+    if ( isset($config['units']) )
+        $units = $config['units'];
+    else
+        $units = "si";
 
     foreach( $config[ 'series' ] as $item ) {
+        $functions = array();
         if ( $item['type'] == "stack" )
             $stacked++;
         if ( $item['type'] == "pie" )
@@ -73,6 +80,7 @@ function build_graphite_series( $config, $host_cluster = "" ) {
             $metric = "$function($metric)";
         }
 
+#        $targets[] = "target=". urlencode( "cactiStyle(alias($metric,'${item['label']}'),'${units}')" );
         $targets[] = "target=". urlencode( "alias($metric,'${item['label']}')" );
         $colors[] = $item['color'];
     }
@@ -80,9 +88,8 @@ function build_graphite_series( $config, $host_cluster = "" ) {
     $output = implode( $targets, '&' );
     $output .= "&colorList=" . implode( $colors, ',' );
     $output .= "&vtitle=" . urlencode( isset($config[ 'vertical_label' ]) ? $config[ 'vertical_label' ] : "" );
+    $output .= "&yUnitSystem=" . $units;
 
-    if ( isset($config['units']) )
-        $output .= "&yUnitSystem=" . $config['units'];
     if ( isset($config['graph_max']) )
         $output .= "&max=" . $config['graph_max'];
 
@@ -109,7 +116,7 @@ function print_graph($args, $metric_report, $graph_size, $from, $until) {
     $graph_html = "
       <div class=\"graph_card\">
         <div class=\"graph_img\">
-          <a href=\"?$args&from=$from&until=$until\">
+          <a href=\"?$args&z=$graph_size&from=$from&until=$until\">
             <img width=\"$width\" height=\"$height\" class=\"lazy\" src=\"img/blank.gif\" data-original=\"". get_graph_domainname() . "/graph.php?$args&$metric_report&z=$graph_size&from=$from&until=$until\" />
           </a>
         </div>
@@ -128,19 +135,27 @@ function print_zoom_graph($args, $metric_report, $graph_size, $from, $until) {
           <a href=\"graph.php?$args&$metric_report&from=$from&until=$until&z=xlarge\">
             <img width=\"$width\" height=\"$height\" class=\"lazy\" src=\"img/blank.gif\" data-original=\"". get_graph_domainname() . "/graph.php?$args&$metric_report&z=$graph_size&from=$from&until=$until\" />
           </a>
-        </div>
+        </div><div class=\"graph_name left\">$metric_report</div>
         " . show_graph_buttons("$args&$metric_report", $from, $until) . "</div>";
     return $graph_html;
 }
 
 function show_graph_buttons($args, $from, $until) {
-    $button_html = "<div class=\"graph_buttons\">
+    global $conf;
+    $button_html = "<div class=\"graph_buttons right\">
           <a href=\"graph_all_periods.php?$args\">
-            <img src=\"img/history_holo_16.png\" width=\"16\" height=\"16\" title=\"Show periodic graphs\">
-          </a>
+            <img src=\"img/historical.svg\" class=\"graph_button\" title=\"Show periodic graphs\">
+          </a>&nbsp;
           <a href=\"graph.php?$args&from=$from&until=$until&z=xlarge\">
-            <img src=\"img/zoom_holo_16.png\" width=\"16\" height=\"16\" title=\"Show XL graph\">
-          </a>
+            <img src=\"img/zoom.svg\" class=\"graph_button\" title=\"Show XL graph\">
+          </a>&nbsp;";
+    if (isset($conf['graphlot_url_base'])) {
+    $button_html = $button_html . "
+          <a href=\"graph.php?$args&from=$from&until=$until&graphlot=true\" target=\"_blank\">
+            <img src=\"img/graphlot.svg\" class=\"graph_button\" title=\"Show Graphlot\">
+          </a>";
+    }
+    $button_html = $button_html . "
         </div>
       ";
     return $button_html;
@@ -148,14 +163,15 @@ function show_graph_buttons($args, $from, $until) {
 
 function print_period_graph($args, $timeframe) {
     global $conf;
-    $width  = $conf['graph_sizes']["large"]['width'];
-    $height = $conf['graph_sizes']["large"]['height'];
+    $graph_size = "large";
+    $width  = $conf['graph_sizes']["$graph_size"]['width'];
+    $height = $conf['graph_sizes']["$graph_size"]['height'];
 
     $graph_html = "
       <div class=\"graph_card\">
         <div class=\"graph_img\">
           <a href=\"graph.php?$args&z=xlarge&st=$timeframe+ago\">
-            <img width=\"$width\" height=\"$height\" class=\"lazy\" src=\"img/blank.gif\" data-original=\"". get_graph_domainname() . "/graph.php?$args&z=large&st=$timeframe+ago\" />
+            <img width=\"$width\" height=\"$height\" class=\"lazy\" src=\"img/blank.gif\" data-original=\"". get_graph_domainname() . "/graph.php?$args&z=$graph_size&st=$timeframe+ago\" />
           </a>
         </div>
       </div>
@@ -177,7 +193,7 @@ function find_limits($environment, $cluster, $metricname, $start, $end) {
     foreach ( $data as $data_target ) {
         $highestMaxDatapoints = $data_target['datapoints'];
         foreach ( $highestMaxDatapoints as $datapoint ) {
-            array_push($maxdatapoints, $datapoint[0]);
+            $maxdatapoints[] = $datapoint[0];
         }
     }
     sort($maxdatapoints);
@@ -188,10 +204,12 @@ function find_limits($environment, $cluster, $metricname, $start, $end) {
 #------------------------------------------------------------------------------
 # Finds dashboards to specific environment/cluster
 function find_dashboards($environment, $cluster="") {
-    global $conf;
+    global $conf, $dash_config;
+
+    if ( ! isset( $dash_config ) )
+        $dash_config = json_decode(file_get_contents($conf['dashboard_config']), TRUE);
 
     $graph_reports = array();
-    $dash_config = json_decode(file_get_contents($conf['dashboard_config']), TRUE);
     foreach ($dash_config['dashboards'] as $dash) {
         if (! preg_match($dash['environments'], $environment) ) {
             continue;
@@ -202,7 +220,7 @@ function find_dashboards($environment, $cluster="") {
             }
         }
         foreach ($dash['included_reports'] as $dashboard) {
-            array_push($graph_reports, $dashboard);
+            $graph_reports[] = $dashboard;
         }
     }
     return $graph_reports;
@@ -211,9 +229,10 @@ function find_dashboards($environment, $cluster="") {
 #------------------------------------------------------------------------------
 # Determines of report graphs should be shows in this dashboard
 function show_on_dashboard($report_name, $environment, $cluster) {
-    global $conf;
+    global $conf, $dash_config;
 
-    $dash_config = json_decode(file_get_contents($conf['dashboard_config']), TRUE);
+    if ( ! isset( $dash_config ) )
+        $dash_config = json_decode(file_get_contents($conf['dashboard_config']), TRUE);
     foreach ($dash_config['dashboards'] as $dash) {
         if ( preg_match($dash['environments'], $environment) && preg_match($dash['clusters'], $cluster) ){
             if ( in_array($report_name, $dash['included_reports']) ) {
@@ -241,7 +260,7 @@ function find_metrics($search_string, $group_depth=0) {
     while ($i <= 10) {
         $search_query_wildcard = $search_query_wildcard . ".*";
         $search_query_item = "&query=" . $search_prefix . $search_query_wildcard;
-        array_push($search_query_array, $search_query_item);
+        $search_query_array[] = $search_query_item;
         $i++;
     }
     $search_query = implode("", $search_query_array);
@@ -255,11 +274,30 @@ function find_metrics($search_string, $group_depth=0) {
         $metric_group = join(".", array_slice($arr, 0, $group_depth));
         if (!isset($metrics[$metric_group]) )
             $metrics[$metric_group] = array();
-        array_push($metrics[$metric_group], $metric_string);
+        $metrics[$metric_group][] = $metric_string;
     }
 
     curl_close($ch);
     return $metrics;
 }
 
-?>
+#------------------------------------------------------------------------------
+## Find graphite metrics belonging to a specific report
+function find_report_metrics($graph_report) {
+    global $conf;
+
+    $metrics = array();
+    // Generally we only have 1 report specified when using this
+    $report_definition_file = $conf['graph_template_dir'] . "/" . $graph_report . ".json";
+    if ( is_file($report_definition_file) ) {
+        $graph_config = json_decode(file_get_contents($report_definition_file), TRUE);
+    }
+    else {
+        error_log("There is no JSON config file specifying $graph_report.");
+        exit(1);
+    }
+    foreach ($graph_config['series'] as $serie) {
+        $metrics[$graph_config['title'] . " metrics"][] = $serie['metric'];
+    }
+    return $metrics;
+}

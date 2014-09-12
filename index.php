@@ -14,11 +14,10 @@ $ge     = isset($_GET['until']) ? $_GET['until'] : "-30 seconds";
 $z      = isset($_GET['z']) && in_array($_GET[ 'z' ], $conf['graph_sizes_keys']) ? $_GET['z'] : "default";
 $view   = NULL;
 
-#$from   = "-" . $gs;
-#$until  = ($ge == "now") ? $ge : "-" . $ge;
 $from   = $gs;
 $until  = ($ge == "now") ? $ge : $ge;
 
+$view   = "over";
 if ($env)     { $view = "env"; }
 if ($c)       { $view = "cluster"; }
 if ($c && $h) { $view = "host"; }
@@ -28,10 +27,7 @@ include_once "./menu.php";
 
 print "<div id=\"main\">";
 
-if ($view)
-    include_once "./${view}_view.php";
+include_once "./${view}_view.php";
 
 print "</div>";
 include_once "./footer.php";
-?>
-

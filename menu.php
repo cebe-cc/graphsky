@@ -1,120 +1,153 @@
-      <div id="menu"><div class="menu_cell">
-        <form name="opts" method="get" action="index.php">
-          <div class="menu_cell left">
-            <div class="menu_cell">
-              <div class="select"><select name="env" onchange="document.opts.c.value = ''; document.opts.h.value = ''; document.opts.submit()">
+<form name="opts" method="get" action="index.php">
+ <div id="menu">
+  <input id="menu-checkbox" type="checkbox"/>
+  <label for="menu-checkbox"></label>
+  <div id="overlay"></div>
+  <div id="top_menu">
+    <a href="/"><div id="menu_logo"></div></a>
+    <div id="selection_menu" class="left">
 <?php
 $environment_search = json_decode(file_get_contents($conf['graphite_search_url'] . $conf['graphite_prefix'] . "*"), TRUE);
-$environments = $environment_search['results']; natsort($environments);
+$environments = $environment_search['results']; if (sizeof($environments) > 1) { natsort($environments); }
 $environments = str_replace($conf['graphite_prefix'], "", $environments);
 $cluster_search = json_decode(file_get_contents($conf['graphite_search_url'] . $conf['graphite_prefix'] . "$env.*"), TRUE);
-$clusters = $cluster_search['results']; natsort($clusters);
+$clusters = $cluster_search['results']; if (sizeof($clusters) > 1) { natsort($clusters); }
 $clusters = str_replace($conf['graphite_prefix'] . "$env.", "", $clusters);
 $host_search = json_decode(file_get_contents($conf['graphite_search_url'] . $conf['graphite_prefix'] . "$env.$c.*"), TRUE);
-$hosts = $host_search['results']; natsort($hosts);
+$hosts = $host_search['results']; if (sizeof($hosts) > 1) { natsort($hosts); }
 $hosts = str_replace($conf['graphite_prefix'] . "$env.$c.", "", $hosts);
-
-print print_dropdown_menus($environments, $env, "Select environment");
 ?>
-              </select></div>
-            </div>
-            <div class="menu_cell">&gt;</div>
-            <div class="menu_cell">
-              <div class="select"><select name="c" onchange="document.opts.h.value = ''; document.opts.submit()">
+      <!-- Environments -->
+      <div class="selection_menu_cell">
+        <div class="select"><select name="env" title="Select environment" onchange="if (typeof document.opts.c != 'undefined') { document.opts.c.value = '' }; if (typeof document.opts.h != 'undefined') { document.opts.h.value = '' }; document.opts.submit()">
+<?php
+print print_dropdown_menus($environments, $env, "All environments");
+?>
+        </select></div>
+      </div>
+      <!-- /Environments -->
+<?php
+if (isset($env) && $env != "") {
+?>
+      <!-- Clusters -->
+      <div class="selection_menu_cell">
+        <div class="select"><select name="c" title="Select cluster" onchange="if (typeof document.opts.h != 'undefined') { document.opts.h.value = '' }; document.opts.submit()">
 <?php
 print print_dropdown_menus($clusters, $c, "All clusters");
 ?>
-              </select></div>
-            </div>
-            <div class="menu_cell">&gt;</div>
-            <div class="menu_cell">
-              <div class="select"><select name="h" onchange="document.opts.submit()">
+        </select></div>
+      </div>
+      <!-- /Clusters -->
+<?php
+}
+if (isset($c)) {
+?>
+      <!-- Hosts -->
+      <div class="selection_menu_cell">
+        <div class="select"><select name="h" title="Select host" onchange="document.opts.submit()">
 <?php
 print print_dropdown_menus($hosts, $h, "All hosts");
 ?>
-              </select></div>
-            </div>
+        </select></div>
+      </div>
+      <!-- /Hosts -->
+<?php
+}
+?>
+    </div>
+    <div id="settings_menu" class="right">
+      <div class="datetime_menu_cell">
+        <input name="from" value="<?php print $gs; ?>" id="from_calendar"/>
+      </div>
+      <div id="datetime_sep_menu_cell"> - </div>
+      <div id="datetime_nm_menu_cell">to</div>
+      <div class="datetime_menu_cell">
+        <input name="until" value="<?php print $ge; ?>" id="until_calendar"/>
+      </div>
+      <div id="button_menu_cell"><button id="go_button" type="submit"></button></div>
+    </div>
+  </div>
+  <div id="graph_menu" class="graph_menu-down">
+    <!-- Reports -->
 <?php
 if (isset($m)) { $onchange = "document.opts.m.value = ''; document.opts.submit();"; }
 else { $onchange = "document.opts.submit();"; }
 ?>
-            <div class="menu_cell">&gt;</div>
-            <div class="menu_cell">
-              <div class="select"><select name="g" onchange="<?php echo $onchange; ?>">
+    <div class="graph_menu_cell left">
+      <div class="select_name_menu_cell">Report:</div>
+      <div class="select"><select name="g" title="Select graph report" onchange="<?php echo $onchange; ?>">
 <?php
-print print_dropdown_menus(find_dashboards($env, $c), $g, "All reports");
+print print_dropdown_menus(find_dashboards($env, $c), $g, "All");
 ?>
-              </select></div>
-            </div>
+      </select></div>
+    </div>
+    <!-- /Reports -->
 <?php
 if (isset($h)) {
 ?>
-            <div class="menu_cell">&gt;</div>
-            <div class="menu_cell">
-              <div class="select"><select onchange="location = this.options[this.selectedIndex].value;">
-                <option value="#reports" selected="selected">Go to metricgroup</option>
+      <!-- Metrics -->
+    <div class="graph_menu_cell left">
+      <div class="select_name_menu_cell">Metric:</div>
+      <div class="select"><select title="Jump to a metric group" onchange="location = this.options[this.selectedIndex].value;">
+        <option value="#reports" selected="selected">Jump to...</option>
 <?php
 $host_metrics=array_keys(find_metrics("$env.$c.$h", $conf['host_metric_group_depth']));
 foreach ($host_metrics as $metric_group) {
     print "             <option value=\"#$metric_group\">$metric_group</option>\n";
 }
 ?>
-              </select></div>
-            </div>
+      </select></div>
+    </div>
+    <!-- /Metrics -->
 <?php
 }
 elseif (isset($c)) {
 ?>
-            <div class="menu_cell">&gt;</div>
-            <div class="menu_cell">
-              <div class="select"><select name="m" onchange="document.opts.g.value = ''; document.opts.submit()">
+    <!-- Metrics -->
+    <div class="graph_menu_cell left">
+      <div class="select_name_menu_cell">Metric:</div>
+      <div class="select"><select name="m" title="Select a single metric" onchange="document.opts.g.value = ''; document.opts.submit()">
 <?php
 $all_metrics=array_keys(find_metrics("$env.$c.*", "10"));
-print print_dropdown_menus($all_metrics, $m, "All metrics");
+print print_dropdown_menus($all_metrics, $m, "Select...");
 ?>
-              </select></div>
-            </div>
+      </select></div>
+    </div>
+    <!-- /Metrics -->
 <?php
 }
 ?>
-          </div>
-          <div class="menu_cell right">
-            <div class="menu_cell">from</div>
-            <div class="menu_cell">
-              <input name="from" value="<?php print $gs; ?>" id="from_calendar"/>
-            </div>
-            <div class="menu_cell">until</div>
-            <div class="menu_cell">
-              <input name="until" value="<?php print $ge; ?>" id="until_calendar"/>
-            </div>
-            <div class="menu_cell"><button type="submit">Go</button></div>
-            <div class="menu_cell">
-              <a href="javascript:;" class="small_menu_button"></a>
-              <div id="small_menu">
-                <div class="small_menu_cell small_menu_title">
-                  Graph settings
-                </div>
-                <hr />
-                <div class="small_menu_row"><div class="small_menu_cell">
-                  size:
-                </div></div>
-                <div class="small_menu_row"><div class="small_menu_cell">
-                  <div class="select"><select name="z" onchange="document.opts.submit()">
+    <!-- Graph size -->
+    <div class="graph_menu_cell right">
+      <div class="select_name_menu_cell">Graph size:</div>
+      <div class="select"><select name="z" onchange="document.opts.submit()">
 <?php
 print print_dropdown_menus(array_keys($conf['graph_sizes']), $z, "");
 ?>
-                  </select></div>
-                </div></div>
+      </select></div>
+    </div>
+    <!-- /Graph size -->
 <?php
-    if ($l == "yes" ) { $checked = "checked"; } else { $checked = ""; }
+if (isset($m)) {
+  if ($l == "yes" ) { $checked = "checked"; } else { $checked = ""; }
 ?>
-                <hr />
-                <div class="small_menu_row"><div class="small_menu_cell">
-                  <input id="scalebox" type="checkbox" name="l" value="yes" onchange="document.opts.submit()" <?php print $checked ?>/>
-                  <label for="scalebox">metric graph scaling<label/>
-                </div></div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div></div>
+    <!-- Scale option -->
+    <div class="graph_menu_cell right">
+      <div class="select_name_menu_cell">Scale metric graphs</div>
+      <div class="select"><select name="l" onchange="document.opts.submit()">
+<?php
+print print_dropdown_menus(array("yes"), $l, "no");
+?>
+      </select></div>
+    </div>
+    <!-- /Scale option -->
+<?php
+}
+?>
+    <div class="graph_menu_cell right" style="height: 50px;">
+      <div id="graph_menu_dropdown_button" onclick="$('.graph_menu_cell').css({'height':'50px'}); $('#graph_menu_dropdown_button').css({'display':'none'}); $('#graph_menu_slideup_button').css({'display':'table'});">&nspb;</div>
+      <div id="graph_menu_slideup_button" onclick="$('.graph_menu_cell').css({'height':'0px'}); $('#graph_menu_slideup_button').css({'display':'none'}); $('#graph_menu_dropdown_button').css({'display':'table'});">&nspb;</div>
+    </div>
+  </div>
+ </div>
+</form>

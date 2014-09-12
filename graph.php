@@ -10,11 +10,15 @@ $min            = isset($_GET['n']) && is_numeric($_GET['n']) ? $_GET['n'] : 0;
 $sourcetime     = isset($_GET['st']) ? sanitize($_GET['st']) : NULL;
 $from           = isset($_GET['from']) ? sanitize($_GET['from']) : NULL;
 $until          = isset($_GET['until']) ? sanitize($_GET['until']) : NULL;
-$puppetrun      = isset($_GET['pr']) ? sanitize($_GET['pr']) : NULL;
 $setmax         = isset($_GET['l']) ? $_GET['l'] : "no";
 $env            = isset($_GET['env']) ? $_GET['env'] : $conf['graphite_default_env'];
+$cluster        = isset($_GET['c']) ? $_GET['c'] : "*";
 $host           = isset($_GET['h']) ? $_GET['h'] : $conf['cluster_hostname'];
-$graph = isset($_GET['g'])  ?  sanitize ( $_GET['g'] )   : "metric";
+$dn             = isset($_GET['dn']) ? $_GET['dn'] : "";
+$graph          = isset($_GET['g']) ? sanitize($_GET['g']) : "metric";
+$height         = isset($_GET['height']) ? $_GET['height'] : $conf['graph_sizes'][$size]['height'];
+$width          = isset($_GET['width']) ? $_GET['width'] : $conf['graph_sizes'][$size]['width'];
+$graphlot       = isset($_GET['graphlot']) ? $_GET['graphlot'] : NULL;
 
 $graph_arguments = NULL;
 $pos = strpos($graph, ",");
@@ -24,64 +28,60 @@ if ($pos !== FALSE) {
     $graph = $graph_report;
 }
 
-if ( $host == "\*" ) { $host = "*"; }
-$clustername = isset($_GET['c']) ? sanitize($_GET['c']) : "*";
-
-$graphite_url = '';
-
-if (isset($_GET['height']))
-    $height = $_GET['height'];
-else
-    $height  = $conf['graph_sizes'][$size]['height'];
-
-if (isset($_GET['width']))
-    $width =  $_GET['width'];
-else
-    $width = $conf['graph_sizes'][$size]['width'];
-
 if ($sourcetime) {
     $start = "-" . $sourcetime;
-} elseif ($from) {
+}
+elseif ($from) {
     $start = sanitize_datetime($from);
-} else {
+}
+else {
     $start = $conf['default_time_range'];
 }
 
 if ($until) {
     $end = sanitize_datetime($until);
-} else {
+}
+else {
     $end = "now";
 }
 
 // Add hostname to report graphs' title in host view
-if (isset($_GET['dn']))
-    $title_prefix = $_GET['dn'];
-elseif ($clustername != "*" && $clustername != "") {
-    $title_prefix = "$clustername";
-    if ($host != "*" && $host != "")
-        $title_prefix .= " - $host";
+$title_prefix = "";
+$title_prefix_array = array();
+if (isset($_GET['dn'])) {
+    $title_prefix_array[] = $_GET['dn'];
 }
-elseif ($host != "*" && $host != "")
-    $title_prefix = $host;
-else
-    $title_prefix = "";
+elseif ($host != "*" && $host != "") {
+    $title_prefix_array[] = $cluster;
+    $title_prefix_array[] = $host;
+}
+elseif ($cluster != "*" && $cluster != "") {
+    $title_prefix_array[] = $cluster;
+}
+elseif ($env != "*" && $env != "") {
+    $title_prefix_array[] = $env;
+}
 
-if ( isset($_GET['s'])) {
+if (sizeof($title_prefix_array) > 0 && $title_prefix_array[0] != "") {
+    $title_prefix = implode(" - ", $title_prefix_array) . " - ";
+}
+
+if (isset($_GET['s'])) {
     $service_name = sanitize($_GET['s']);
-  
+
     $json_templates = glob($conf['graph_template_dir'] . "/*.json");
     foreach ( $json_templates as $json_template) {
         $template = json_decode(file_get_contents($json_template), TRUE);
-        if ( $template['service_name'] == "$service_name")
-            $report_name = $template['report_name'];
+        if ( $template['service_name'] == $service_name) {
+            $service_report_name = $template['report_name'];
+        }
     }
 }
 
-if ( isset($_GET['g']) )
-    $report_name = sanitize($_GET['g']);
+$host_cluster = $env . "." . $cluster . "." . $host;
 
-$host_cluster = $env . "." . $clustername . "." . $host;
-if ( isset($report_name) ) {
+if (isset($_GET['g']) or isset($service_report_name)) {
+    $report_name = isset($service_report_name) ? sanitize($service_report_name) : sanitize($_GET['g']);
     $report_definition_file = $conf['graph_template_dir'] . "/" . $report_name . ".json";
     // Check whether report is defined in graph.d directory
     if ( is_file($report_definition_file) ) {
@@ -95,14 +95,14 @@ if ( isset($report_name) ) {
     if ( isset($graph_config) ) {
         if ( isset($graph_config['report_type']) ) {
             if ( $graph_config['report_type'] == "template" ) {
-                $target = str_replace("HOST_CLUSTER", "$host_cluster", $graph_config['graphite']);
+                $target = str_replace("HOST_CLUSTER", $host_cluster, $graph_config['graphite']);
             }
         }
         else {
-                    $target = build_graphite_series( $graph_config, $conf['graphite_prefix'] . "$host_cluster" );
+            $target = build_graphite_series( $graph_config, $conf['graphite_prefix'] . $host_cluster );
         }
 
-        $title = $title_prefix . " - " . $graph_config['title'];
+        $title = $title_prefix . $graph_config['title'];
     }
     else {
         error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
@@ -110,34 +110,39 @@ if ( isset($report_name) ) {
     }
 }
 elseif ( isset($metric_name) ) {
-    if ( isset($host) && ($host != "*") && ($setmax == "yes") ) { 
-        $max = find_limits($env, $clustername, $metric_name, $start, $end);
+    if ( isset($host) && ($host != "*") && ($setmax == "yes") ) {
+        $max = find_limits($env, $cluster, $metric_name, $start, $end);
     }
     else {
         $max = "";
     }
     // It's a simple metric graph
-    $target = "target=alias(sumSeries(" . $conf['graphite_prefix'] . "$host_cluster.$metric_name),'$metric_name')&vtitle=" . urlencode($vlabel) . "&areaMode=all&colorList=". $conf['default_metric_color'];
-    $title = "$title_prefix - $metric_name";
+    $target = "target=legendValue(alias(sumSeries(" . $conf['graphite_prefix'] . "$host_cluster.$metric_name),''),'last','max','min','si')&vtitle=" . urlencode($vlabel) . "&areaMode=all&colorList=". $conf['default_metric_color'];
+    $title = "$title_prefix $metric_name";
 }
 else {
   error_log("I don't know what to do");
 }
 
 if ($sourcetime) $title = "$title last " . str_replace(" ago","",$sourcetime);
-if ($puppetrun == "yes" && isset( $_GET['h']) && $host != "*") $target = "target=alias(color(drawAsInfinite(" .$conf['graphite_puppet_prefix'] . $env . "." . $host . "_*),'FF00FFAA'),'puppetrun')&" . $target;
 
-$graphite_url = $conf['graphite_render_url'] . "?width=$width&height=$height&" . $target . "&from=" . urlencode($start) . "&until=" . urlencode($end) . "&yMin=" . $min . "&yMax=" . $max . "&bgcolor=" . $conf['default_background_color'] . "&fgcolor=" . $conf['default_foreground_color'] . "&title=" . urlencode($title);
+$graphite_url_args = "?width=$width&height=$height&" . $target . "&from=" . urlencode($start) . "&until=" . urlencode($end) . "&yMin=" . $min . "&yMax=" . $max . "&bgcolor=" . $conf['default_background_color'] . "&fgcolor=" . $conf['default_foreground_color'] . "&areaAlpha=0.7&title=" . urlencode($title);
 
-if ($graphite_url) {
+if ( isset($graphlot) ) {
+    $graphlot_url = $conf['graphlot_url_base'] . $graphite_url_args;
+    header ("Location: $graphlot_url");
+}
+else {
+    $graphite_url = $conf['graphite_render_url'] . $graphite_url_args . "&format=svg";
     header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");   // Date in the past
     header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
     header ("Cache-Control: no-cache, must-revalidate");   // HTTP/1.1
     header ("Pragma: no-cache");                     // HTTP/1.0
-    header ("Content-type: image/png");
-    $im = imagecreatefrompng($graphite_url);
-    imagepng($im, NULL, 9);
-    imagedestroy($im);
+    header ("Content-type: image/svg+xml");
+
+    ob_clean(); flush();
+    if ( readfile( $graphite_url ) === False ) {
+        error_log( "Image creation error, Graphite URL $graphite_url" );
+    }
 }
 
-?>
