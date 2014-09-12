@@ -23,7 +23,7 @@ $conf['graphite_puppet_prefix'] = "puppet.";
 $conf['graphite_default_env'] = "net";
 
 # Graph settings
-$conf['default_time_range'] = '-1 hour';
+$conf['default_time_range'] = '-24 hour';
 $conf['default_metric_color'] = '33B5E5';
 $conf['default_background_color'] = 'FFFFFF';
 $conf['default_foreground_color'] = '000000';

@@ -3,6 +3,6 @@
     "title" : "Postfix mailstats",
     "vertical_label" : "mails",
     "series" : [
-        { "metric": "postfix_mailstats.delivered", "color": "5555cc", "label": "mails", "line_width": "2", "type": "line", "functions" : ["derivative"] }
+        { "metric": "postfix_mailstats.delivered", "color": "5555cc", "label": "mails", "line_width": "2", "type": "line", "functions" : ["derivative", "scaleToSeconds"] }
     ]
 }
