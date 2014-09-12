@@ -3,6 +3,6 @@
     "title" : "Apache volume",
     "vertical_label" : "volume",
     "series" : [
-        { "metric": "apache_volume.volume80", "color": "5555cc", "label": "volume", "line_width": "2", "type": "line", "functions" : ["derivative"] }
+        { "metric": "apache_volume.volume80", "color": "5555cc", "label": "volume", "line_width": "2", "type": "line", "functions" : ["sumSeries", "derivative", "scaleToSeconds"] }
     ]
 }

@@ -76,8 +76,12 @@ function build_graphite_series( $config, $host_cluster = "" ) {
         if ( isset($item['hostname']) && isset($item['clustername']) )
             $host_cluster = $item['clustername'] . "." . str_replace(".","_", $item['hostname']);
         $metric = "$host_cluster.${item['metric']}";
-        foreach( $functions as $function ) {
-            $metric = "$function($metric)";
+		foreach( $functions as $function ) {
+			if ($function == 'scaleToSeconds') {
+            	$metric = "$function($metric,1)";
+			} else {
+	            $metric = "$function($metric)";
+			}
         }
 
 #        $targets[] = "target=". urlencode( "cactiStyle(alias($metric,'${item['label']}'),'${units}')" );

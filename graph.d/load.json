@@ -4,6 +4,6 @@
     "title" : "Load",
     "vertical_label" : "loads",
     "series" : [
-        { "metric": "load.load", "color": "green", "label": "1-min", "type": "line" }
+        { "metric": "load.load", "color": "green", "label": "1-min", "type": "line", "functions": ["averageSeries"]}
     ]
 }
